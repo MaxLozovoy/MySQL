@@ -1,0 +1,121 @@
+use vk;
+
+show TABLES;
+describe users;
+select * from users limit 10;
+update users  set updated_at = NOW() where updated_at < created_at;
+
+desc profiles;
+select * from profiles limit 10;
+update profiles set updated_at = NOW() where updated_at < created_at;
+
+desc messages;
+select * from messages limit 10;
+select FLOOR(1 + RAND() *100);
+update messages set
+  from_user_id = FLOOR(1 + RAND() *100),
+  to_user_id = FLOOR(1 + RAND() *100);
+  
+ 
+ desc media;
+select * from media limit 10;
+-- https: //dropbox.com/vk/soluta.avi
+-- {"owner":"Name Surname"}
+update media set updated_at = NOW() where updated_at < created_at;
+
+update media set
+  user_id = FLOOR(1 + RAND() *100);
+
+-- создаем временную таблицу с значениями расширений медиафайлов
+create temporary table extensions (name VARCHAR(10));
+-- встарвляем в нее значения форматов
+insert into extensions values ('avi'), ('png'), ('mp3'), ('mpeg4');
+
+select * from extensions;
+
+-- https: //dropbox.com/vk/soluta.avi
+-- с помощью функции конкатинации собираем ссылку на определенный файл
+-- со случайным расширением  из временной таблицы extensions
+
+update media set filename = CONCAT(
+  'https://dropbox.com/vk/', 
+  filename, 
+  '.', 
+  (SELECT name FROM extensions ORDER BY RAND() LIMIT 1)
+  );
+
+ 
+-- в таблице media size не должен быть равен 0
+update media  set size = floor(10000 + rand() * 10000000) where size < 10000;
+
+-- {"owner":"Name Surname"} далее нужно заполнить столбец metadata
+UPDATE media SET metadata = CONCAT(
+  '{"owner":"',
+  (SELECT CONCAT(first_name, ' ', last_name) FROM users WHERE media.user_id = users.id),
+  '"}');
+ 
+select * from media_types;
+
+
+-- для того что бы данные были реальные, удадляем все строк из такблицы 
+delete from media_types;
+
+-- добавляем в таблицу в столбец name реальные данные
+insert into media_types (name) values
+  ('audio'),
+  ('video'),
+  ('image');
+ 
+-- после удаления всего из таблицы id продолжали пересчитваться и были уже 101, 102 и тп
+-- для этого нужно было отменить счетчик автоинкримента и использовать для удаления
+-- функцию  truncate. уделяем и добавляем опять заново новые данные
+truncate media_types;
+
+-- после этого надо связать id из таблицы media media_type_id с новыми id в таблице media_types
+update media set
+  media_type_id = FLOOR(1 + RAND() * 3);
+
+update media_types set updated_at = NOW() where updated_at < created_at;
+
+desc friendship;
+select * from friendship;
+update friendship set updated_at = NOW() where updated_at < created_at;
+alter table friendship drop column requested_at;
+-- меняем случайным образом id user и id fried
+update friendship set
+  user_id = FLOOR(1 + RAND() *100),
+  friend_id = FLOOR(1 + RAND() *100);
+
+ 
+select * from friendship_statuses;
+
+-- в таблице friendship_statuses очень много статусов (100) надо их заменить на реально кол-во
+truncate friendship_statuses;
+
+insert into friendship_statuses (name) values
+  ('Requested'),
+  ('Confirmed'),
+  ('Rejected');
+
+-- после этого надо обновить столбец в таблице friedship
+update friendship set
+  friendship_status_id = FLOOR(1 + RAND() * 3);
+ 
+select * from communities;
+update communities set updated_at = NOW() where updated_at < created_at;
+-- в таблице communities много групп, оставим только 20
+delete from communities where id > 20;
+
+-- в столбце owner_id были нули, заполняем их случайным образом
+update communities set
+  owner_id = FLOOR(1 + RAND() * 100);
+ 
+ 
+desc communities_users;
+
+select * from communities_users;
+
+-- так как мы оставили только 20 групп, надо для всех значений в столбце community_id 
+-- которые больше 20 внести данные из диапазона от 1 до 20 случаным образом
+update communities_users set
+  community_id = FLOOR(1 + RAND() * 20);
