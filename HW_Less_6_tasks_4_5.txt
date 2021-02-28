@@ -1,0 +1,42 @@
+-- 4. Подсчитать общее количество лайков, которые получили 10 самых молодых пользователей.
+-- добавил привязку к target_type_id = 2
+
+-- с учетом корректировки
+select 
+  count(target_id) as total 
+from 
+  likes
+where 
+  target_type_id = 2 -- добавил привязку к target_type_id = 2
+ and 
+  target_id in (select * from (select user_id -- изменил параметры выборки 
+FROM 
+  profiles
+ORDER BY age asc LIMIT 10) as total);
+
+
+-- предыдущий вариант
+select 
+  count(target_id) as total 
+from 
+  likes
+where 
+  user_id in (select * from (select age 
+FROM 
+  profiles
+ORDER BY age asc LIMIT 10) as total);
+
+
+-- 5. Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной 
+-- сети.     
+-- проанализировал ваш вариант, если придумаю что то сам, сделаю.
+-- опыта нет совсем.
+
+SELECT 
+  CONCAT(first_name, ' ', last_name) AS user, 
+	(SELECT COUNT(*) FROM likes WHERE likes.user_id = users.id) + 
+	(SELECT COUNT(*) FROM media WHERE media.user_id = users.id) + 
+	(SELECT COUNT(*) FROM messages WHERE messages.from_user_id = users.id) AS overall_activity 
+	  FROM users
+	  ORDER BY overall_activity
+	  LIMIT 10;
