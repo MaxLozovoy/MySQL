@@ -1,0 +1,112 @@
+
+-- 3. Определить кто больше поставил лайков (всего) - мужчины или женщины?
+
+-- Вариант 1
+-- посчитать по отдельности лайки мужчин и женщин.
+-- сумма лайков поставленных мужчинами
+SELECT 
+  count(user_id) as men_likes
+from 
+  likes 
+where
+  user_id in (select user_id from profiles where gender = 'M');
+
+-- сумма лайков поставленных женщинами
+SELECT 
+  count(user_id) as women_likes
+from 
+  likes 
+where
+  user_id in (select user_id from profiles where gender = 'F');
+
+
+
+-- Вариант 2
+-- создал временную таблицу
+
+DROP temporary table IF EXISTS likes_from;
+ 
+create temporary table likes_from (
+men_likes int not null,
+women_likes int not null);
+
+desc likes_from;
+
+
+-- залил таблицу данными по кол-ву лайков от мужчин и женщин
+insert into likes_from values (
+(SELECT 
+  count(user_id)
+from 
+  likes 
+where
+  user_id in (select user_id from profiles where gender = 'M')), 
+(select 
+  count(user_id)
+from
+  likes 
+where
+  user_id in (select user_id from profiles where gender = 'F'))
+);
+ 
+ 
+select * from likes_from;
+
+-- результат - от кого больше лайков
+SELECT
+  IF(men_likes > women_likes, 
+  'большее кол-ко лайков поставлены мужчинами', 
+  'большее кол-ко лайков поставлены женщинами') AS tolat_likes
+FROM likes_from;
+
+
+
+-- 4. Подсчитать количество лайков которые получили 10 самых молодых пользователей.
+
+-- изменил даты рождений пользователей. залиты были данные для возраста не больше 10 лет.
+update profiles 
+set 
+birthday = FROM_UNIXTIME(ROUND((RAND() * (UNIX_TIMESTAMP('2000-12-01')-UNIX_TIMESTAMP('1950-01-01')))+UNIX_TIMESTAMP('1950-01-01')), '%Y-%m-%d');
+
+
+-- добавил столбец age, не додумался к чему привязать запрос окончательный,
+-- позже ребята подсказали, что можно и по самым большим датам рождения.
+alter table profiles 
+ add age INT not null;
+
+
+select * from profiles limit 10;
+
+-- залил столбец age возрастом
+update profiles 
+set 
+age = (select TIMESTAMPDIFF(YEAR, birthday, NOW()));
+
+
+-- десять самых молодых пользователей
+select
+  user_id,
+  age 
+  FROM profiles
+  ORDER BY age ASC
+  LIMIT 10;
+
+-- результат
+select 
+  count(target_id) as total 
+from 
+  likes
+where 
+  user_id in (select * from (select age 
+FROM 
+  profiles
+ORDER BY age asc LIMIT 10) as total);
+
+
+-- 5. Найти 10 пользователей, которые проявляют наименьшую активность в
+-- использовании социальной сети
+-- (критерии активности необходимо определить самостоятельно).
+-- если по постам и лайкам, то база в 100 мала, пилится на всех по 1-3 лайка/поста максимум.
+-- надо придумать таблицу посещений аккаунта, соответсвенно от сюда и определять активность.
+-- как реализовать логику, пока не понимаю.
+
