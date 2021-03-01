@@ -1,0 +1,50 @@
+-- 1. Составьте список пользователей users, которые осуществили хотя бы один заказ orders в интернет магазине.
+
+-- данные залил с фуйкера
+
+use shop;
+
+desc orders;
+desc users;
+
+select * from users;
+select * from orders;
+
+
+-- мой вариант
+-- по чесноку написал сначала свой вариант, потом проанализировал Ваш.
+-- разница в получаемых данных.
+-- проверил заказы по одному юзеру. бьются с моим вариантом.
+-- я в чем то ошибся?
+-- разобрался - мой запрос выдает имена и заказы пользователя.
+
+SELECT users.name, orders.id
+  FROM users
+    INNER JOIN orders
+      ON users.id = orders.user_id;
+     
+-- проверка ордеров по одному юзеру 2
+select orders.id from orders where user_id = 2;  
+
+-- ваш вариант
+SELECT u.id, u.name, u.birthday_at
+  FROM users AS u
+   JOIN orders AS o
+     ON u.id = o.user_id;
+
+-- 2. Выведите список товаров products и разделов catalogs, который соответствует товару.
+    
+desc catalogs;
+
+desc products;
+ 
+ 
+select * from catalogs;
+
+select * from products;
+
+select products.name, 
+  catalogs.name as catalog
+  from products
+    left join catalogs 
+      on products.catalog_id = catalogs.id;
