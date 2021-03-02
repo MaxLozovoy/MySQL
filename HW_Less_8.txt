@@ -1,0 +1,59 @@
+-- Определить кто больше поставил лайков (всего) - мужчины или женщины?
+
+select
+  profiles.gender,
+  count(profiles.gender) as total
+  from 
+    profiles
+  join 
+    users
+  join 
+    likes
+      on users.id = likes.user_id
+        and users.id = profiles.user_id	
+    GROUP BY gender
+    ORDER BY total DESC
+    LIMIT 1;
+
+
+
+
+-- Подсчитать общее количество лайков, которые получили 10 самых молодых пользователей.
+
+select 
+  count(target_id) as total
+    from
+      likes
+    join
+      target_types on likes.target_type_id = target_types.id and target_type_id = 2
+    join 
+      profiles 
+    on likes.target_id in (select * from (select user_id FROM profiles ORDER BY birthday DESC LIMIT 10) as total) and
+      likes.target_id = profiles.user_id;
+
+
+
+-- Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной сети.
+
+SELECT 
+  CONCAT(first_name, ' ', last_name) AS user, 
+  count(distinct(likes.id)) + 
+  count(distinct(media.id)) + 
+  count(distinct(messages.id)) as overall_activity
+  from users
+  left join likes
+	on likes.user_id = users.id
+  left join media
+	on media.user_id = users.id
+  left join messages
+	on messages.from_user_id = users.id 
+	group by users.id 
+	ORDER BY overall_activity
+	LIMIT 10;
+
+-- удалиль внешний ключ для target_id 
+-- на диаграмме связь пропала
+
+mysql> ALTER TABLE likes DROP FOREIGN KEY likes_target_id_fk;
+Query OK, 0 rows affected (0.06 sec)
+Records: 0  Duplicates: 0  Warnings: 0
