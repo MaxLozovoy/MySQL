@@ -1,0 +1,49 @@
+-- 1. Проанализировать какие запросы могут выполняться наиболее
+-- часто в процессе работы приложения и добавить необходимые индексы.
+
+-- один из частых запросов будет поиск пользователя по имени и фамилии.
+CREATE INDEX users_first_name_last_name_idx 
+ON users(first_name, last_name);
+
+
+-- так же запрос на поиск медиа например видео.
+CREATE INDEX media_filename_media_type_id_idx 
+ON media(filename, media_type_id);
+
+-- Вопрос - Можно ли сделать индекс по нескольким столбцам из разных таблиц?
+-- например поиск по имени и фамилии из users, городу из profiles.
+
+-- 2. Задание на оконные функции
+-- Построить запрос, который будет выводить следующие столбцы:
+-- имя группы;
+-- среднее количество пользователей в группах;
+-- самый молодой пользователь в группе;
+-- самый старший пользователь в группе;
+-- общее количество пользователей в группе;
+-- всего пользователей в системе;
+-- отношение в процентах (общее количество пользователей в группе / всего пользователей в системе) * 100.
+
+-- смог вывести только вот эти данные.
+-- среднее кол-во в группах, очень топорно.
+-- споткнулся на том как вывести младшего/старшего пользователя в группе.
+-- ниже сделал запрос в разрезе каждой группе, как его прикрутить в решение, не понимаю
+select distinct communities.name, 
+  count(community_id) over (partition by communities_users.community_id) as users_on_group,
+  count(user_id) over () as total_users,
+  count(community_id) over (partition by communities_users.community_id) / 
+  count(user_id) over () * 100 as '%%',
+  count(user_id) over () / 20 as avg_users_on_group
+    from communities
+      join communities_users
+        on communities.id = communities_users.community_id;
+       
+       
+          
+-- самый молодой(asc)/взрослый(desc) пользователь в конкретной группе
+select users.id, users.first_name, users.last_name, profiles.age, profiles.birthday
+from users
+join profiles 
+on users.id = profiles.user_id
+join communities_users
+on users.id = communities_users.user_id and community_id = 1
+order by birthday desc limit1;
