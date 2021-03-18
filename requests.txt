@@ -1,0 +1,33 @@
+-- выбор покупателей у которых др в бижайшие 10 дней
+SELECT * FROM  profiles
+WHERE  DATE_ADD(birthday, INTERVAL YEAR(CURDATE())-YEAR(birthday)
++ IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(birthday),1,0)YEAR) 
+BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 3 DAY);
+
+   
+-- выбор покупателя с самой большой тотал суммой всех заказов
+SELECT DISTINCT 
+  customers.id, 
+  CONCAT(first_name, ' ', last_name) AS user,
+  SUM(orders_products.total * products.price) as total_cost
+  FROM customers
+  JOIN products
+  JOIN orders_products
+  ON orders_products.product_id = products.id 
+  JOIN orders
+  ON orders.customer_id = customers.id and orders_products.order_id = orders.id 
+  GROUP BY customers.id;
+  
+ 
+-- проверка 'выбор покупателя с самой большой тотал суммой всех заказов'
+SELECT DISTINCT 
+  customers.id, 
+  CONCAT(first_name, ' ', last_name) AS user,
+  SUM(orders_products.total * products.price) as total_cost
+  FROM customers
+  JOIN products
+  JOIN orders_products
+  ON orders_products.product_id = products.id 
+  JOIN orders
+  ON orders.customer_id = customers.id and orders_products.order_id = orders.id 
+  GROUP BY customers.id, orders.id;

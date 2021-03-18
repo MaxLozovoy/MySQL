@@ -1,0 +1,127 @@
+-- 1. создание таблицы catalogs 
+DROP TABLE IF EXISTS catalogs;
+CREATE TABLE catalogs (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY key auto_increment,
+  name VARCHAR(255) comment "Название раздела"
+  ) comment = "Разделы магазина";
+ 
+ 
+-- 2. таблица brands сделана отдельной для дальнейшей оптимицации запросов по брэнду (наполнена)
+DROP TABLE IF EXISTS brands;
+CREATE TABLE brands (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY auto_increment,
+  name VARCHAR(255),
+  country VARCHAR(255) comment "Страна производитель"
+  );
+ 
+ 
+-- 3. таблица товаров 
+DROP TABLE IF EXISTS products;
+CREATE TABLE products (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY key auto_increment,
+  catalog_id INT UNSIGNED,
+  name VARCHAR(255) comment "Название",
+  brand_id INT UNSIGNED,
+  size ENUM('10 oz', '12 oz', '14 oz', 'S', 'M', 'L', 'XL', '3 метра', '3,5 метра', '4 метра', '4,5 метра',
+  '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', ' '),
+  desription TEXT comment "Описание товара",
+  color ENUM('красный', 'синий', 'белый', 'серый', 'черный', 'коричневый', 'желтый', ' '),
+  price DECIMAL(10,2),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  ) comment = "Товарные позиции";
+ 
+ 
+ -- 4. таблица покупателей 
+DROP TABLE IF EXISTS customers;
+ CREATE TABLE customers (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT "Идентификатор строки", 
+  first_name VARCHAR(100) NOT NULL COMMENT "Имя пользователя",
+  last_name VARCHAR(100) NOT NULL COMMENT "Фамилия пользователя",
+  email VARCHAR(100) NOT NULL UNIQUE COMMENT "Почта",
+  phone VARCHAR(100) NOT NULL UNIQUE COMMENT "Телефон",
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT "Время создания строки",  
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Время обновления строки"
+) COMMENT = "Пользователи";
+
+
+-- 5. Таблица профилей 
+DROP TABLE IF EXISTS profiles;
+CREATE TABLE profiles (
+  customer_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT "Ссылка на пользователя", 
+  birthday DATE COMMENT "Дата рождения",
+  city ENUM('Москва', 'Красногорск', 'Химки') COMMENT "Город проживания",
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT "Время создания строки",  
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Время обновления строки"
+) COMMENT "Профили";
+
+
+-- 6. таблица запасов 
+DROP TABLE IF EXISTS stock_products;
+CREATE TABLE stock_products (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  product_id INT UNSIGNED,
+  value INT UNSIGNED COMMENT 'Запас товарной позиции на складе',
+  storehous_id INT UNSIGNED,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) COMMENT = 'Запасы на складе';
+
+
+-- 7. таблица склады 
+DROP TABLE IF EXISTS storehouses;
+CREATE TABLE storehouses (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) COMMENT 'Название',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) COMMENT = 'Склады';
+
+  
+-- 8. таблица заказов 
+DROP TABLE IF EXISTS orders;
+CREATE TABLE orders (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT UNSIGNED,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+ ) COMMENT = 'Заказы';
+ 
+update orders set updated_at = NOW() where updated_at < created_at;
+
+
+-- 9. таблица состав заказа 
+DROP TABLE IF EXISTS orders_products;
+CREATE TABLE orders_products (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  order_id INT UNSIGNED,
+  product_id INT UNSIGNED,
+  total INT UNSIGNED DEFAULT 1 COMMENT 'Количество заказанных товарных позиций',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) COMMENT = 'Состав заказа';
+
+
+-- 10. таблица персональные скидки 
+DROP TABLE IF EXISTS personal_discounts;
+CREATE TABLE personal_discounts (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT UNSIGNED,
+  discount FLOAT UNSIGNED COMMENT 'Величина скидки от 0.0 до 1.0',
+  started_at DATETIME,
+  finished_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  ) COMMENT = 'Скидки';
+
+ 
+-- 11. таблица скидок на отдельные товары
+DROP TABLE IF EXISTS discounts_goods;
+CREATE TABLE discounts_goods (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  product_id INT UNSIGNED,
+  discount FLOAT UNSIGNED COMMENT 'Величина скидки от 0.0 до 1.0',
+  started_at DATETIME,
+  finished_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) COMMENT = 'Скидки';
+

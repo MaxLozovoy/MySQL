@@ -1,0 +1,23 @@
+-- представление, которое выводит артикул (составленый из product_id, catalog_id)
+-- название name товарной позиции из таблицы products и соответствующее название каталога name
+-- из таблицы catalogs, цена позиции из products и кол-во на складах.
+
+CREATE OR REPLACE VIEW articles as
+SELECT DISTINCT CONCAT(products.id, catalogs.id, products.color, products.size) as art,
+   products.name AS prod_name,
+   catalogs.name AS cat_name,
+   products.price AS price,
+   stock_products.value AS value,
+   storehouses.name AS store
+ FROM 
+   products
+ LEFT JOIN
+   catalogs
+ ON products.catalog_id = catalogs.id
+ LEFT JOIN
+   stock_products
+ ON stock_products.product_id = products.id
+ LEFT JOIN 
+   storehouses
+ ON stock_products.storehous_id = storehouses.id;
+

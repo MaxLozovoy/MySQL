@@ -1,0 +1,38 @@
+-- процедура отпеределения др покупателей в ближайшие 10 дней
+-- с целью их поздравления и предоставления скидки
+DELIMITER //
+CREATE PROCEDURE birthday ()
+BEGIN
+  SELECT customer_id, birthday FROM  profiles
+  WHERE  DATE_ADD(birthday, INTERVAL YEAR(CURDATE())-YEAR(birthday)
+  + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(birthday),1,0)YEAR) 
+  BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 10 DAY);
+END;
+//
+
+CALL birthday;
+
+
+-- постоянная процедура определения общей суммы покупок
+-- в разрезе каждого покупателя
+-- по моему мнению будет использоваться часто
+-- в том числе для аналитики
+DELIMITER //
+CREATE PROCEDURE total_costs ()
+BEGIN
+SELECT DISTINCT 
+  customers.id, 
+  CONCAT(first_name, ' ', last_name) AS user,
+  SUM(orders_products.total * products.price) as total_cost
+  FROM customers
+  JOIN products
+  JOIN orders_products
+  ON orders_products.product_id = products.id 
+  JOIN orders
+  ON orders.customer_id = customers.id and orders_products.order_id = orders.id 
+  GROUP BY customers.id;
+END;
+//
+
+CALL total_costs; 
+
