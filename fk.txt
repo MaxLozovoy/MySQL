@@ -1,0 +1,59 @@
+-- внешние ключи для profiles
+DESC profiles;
+ALTER TABLE profiles
+  ADD CONSTRAINT profiles_customer_id_fk 
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+      ON DELETE CASCADE;
+
+-- внешние ключи для products     
+DESC products;
+ALTER TABLE products
+  ADD CONSTRAINT products_brand_id_fk 
+    FOREIGN KEY (brand_id) REFERENCES brands(id)
+      ON DELETE CASCADE,
+  ADD CONSTRAINT products_catalog_id_fk 
+    FOREIGN KEY (catalog_id) REFERENCES catalogs(id)
+      ON DELETE CASCADE;
+     
+-- внешние ключи для stock_products
+DESC stock_products;
+ALTER TABLE stock_products
+  ADD CONSTRAINT stock_products_product_id_fk 
+    FOREIGN KEY (product_id) REFERENCES products(id)
+      ON DELETE CASCADE,
+  ADD CONSTRAINT stock_products_storehous_id_fk 
+    FOREIGN KEY (storehous_id) REFERENCES storehouses(id)
+      ON DELETE CASCADE;
+     
+-- внешние ключи для orders
+DESC orders;
+ALTER TABLE orders
+  ADD CONSTRAINT orders_customer_id_fk 
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+      ON DELETE CASCADE;
+     
+-- внешние ключи для orders_products
+DESC orders_products;
+ALTER TABLE orders_products
+  ADD CONSTRAINT orders_products_order_id_fk 
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+      ON DELETE CASCADE,
+  ADD CONSTRAINT orders_products_product_id_fk 
+    FOREIGN KEY (product_id) REFERENCES products(id)
+      ON DELETE CASCADE;
+     
+-- внешние ключи для discounts_goods
+DESC discounts_goods;
+ALTER TABLE discounts_goods
+  ADD CONSTRAINT discounts_goods_product_id_fk 
+    FOREIGN KEY (product_id) REFERENCES products(id)
+      ON DELETE CASCADE;
+     
+-- внешние ключи для personal_discounts
+DESC personal_discounts;
+ALTER TABLE personal_discounts
+  ADD CONSTRAINT personal_discounts_customer_id_fk 
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+      ON DELETE CASCADE;
+     
+ 
